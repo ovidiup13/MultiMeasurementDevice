@@ -4,9 +4,9 @@
 
 The main purpose of this concept is to offer a compact, commercially oriented, low cost product which can acquire, compute and display various measurements.
 The proposed prototype is based on the NXP MBED LPC1768 microcontroller and several breakout board modules which are interfaced via custom designed double-sided PCB (Printed Circuit Board). 
-This device is not revolutionary however it provides several technologies into a single package. In terms of pricing the budget limit for the prototype was set at a maximum of £120, including manufacturing, components and breakout boards. The total cost for production in large quantities could be reduced further by combining all of the separate modules into a single more complicated PCB design. 
+This device is not revolutionary however it provides several technologies into a single package. In terms of pricing the budget limit for the prototype was set at a maximum of £120, including manufacturing, components and breakout boards. The total cost for production in large quantities could be reduced further by combining all of the separate modules into a single more complicated PCB design.
 This approach will also reduce the physical size of the device and the manufacturing costs. 
-However due to time limitations and the fact that the device has been developed by students as an extracurricular activity, it was decided that the prototype would be as simplified as possible in terms of hardware but fully functional. 
+However due to time limitations and the fact that the device has been developed by students as an extracurricular activity, it was decided that the prototype would be as simplified as possible in terms of hardware but fully functional.
 
 ## Code
 
@@ -36,6 +36,8 @@ It was decided that GUI will make use of object-oriented principles, which in th
 Following our initial requirements the user interface was designed as a combination of a ‘virtual screen’ object together with a header object. The header will be present on the screen at all times, while the screen may change multiple times according to actions taken by the user. 
 The ‘UserInterface’ object is the actual interface on the screen. As stated, it contains at all times a screen object and a header. In addition, it contains functions to start, initialize the home screen and set-up initial colours when the device boots up.
 The Header object consists of title of current screen and a battery level indicator. Initially,  temperature of the room was included as well but the screen would appear too congested. The header is static and is placed at the top of the screen.
+
+![alt text](assets/fig3.6.png?raw=true "UML Diagram of UI")
  
 The ‘Item’ class is abstract - it has no implementation. The implementation is provided by the classes that inherit the abstract class. This class is following the composite design pattern since the ‘Menu’ object must be an ‘Item’ that can be represented as a part of the screen, but also to contain other ‘Items’. Therefore, an instantiation of the ‘Menu’ class represents the main screen ‘Main Menu’ and contains pointers to other screens. In this way the user will have control over a list of Items which will be displayed on the screen. In essence, the ‘Menu’ contains an array of pointers to ‘Items’ and at the same time will also be an ‘Item’ itself.
 
@@ -45,14 +47,21 @@ The ‘Measure’ class is used for communication with the other modules. Its ro
 
 The ‘Measure’ objects interact with the camera, thermometer module and laser module. 
 
+![alt text](assets/fig3.7.png?raw=true "High Level UI Representation")
+
 ### Implementation
 
 For the implementation phase most of the functionality specified in the design phase has been achieved. By switching easily between the numerous ‘virtual screens’, the LED buffer must be cleared, modified and redisplayed. This is managed with the API provided by the external library. 
-The screen, with a resolution of 128x64, is structured into 8 ‘pages’ as you can see in figure 3.6.3. Each page is 8 pixels high and 128 pixels long. It was decided that a custom interface would be designed according to this structure, as it is much easier because the library provides the necessary functions to write in any of the provided pages. Of course, it also provides the possibility of writing to specific pixels as well. 
+The screen, with a resolution of 128x64, is structured into 8 ‘pages’ as you can see in figure 3.6.3. Each page is 8 pixels high and 128 pixels long. It was decided that a custom interface would be designed according to this structure, as it is much easier because the library provides the necessary functions to write in any of the provided pages. Of course, it also provides the possibility of writing to specific pixels as well.
+
+
+![alt text](assets/fig3.8.png?raw=true "LCD Screen Structure")
 
 The first task was implementing the ‘UserInterface’ class which contains the function to initialize the display. init() is the function that is called when the display turns on, sets up the brightness and contrast level, colours, displays a welcome screen for two seconds, clears the screen, draws the header, the initial menu and waits for user interaction.
 The colour of the display is set up by adjusting the potential on the of cathodes of the red, green and blue LEDs comprising the backlight. Usually this could be achieved with Digital I/O or PWM pins from the microcontroller. However, because of the lack digital I/O for this secondary in priority task, it was decided that the above would be adjusted manually via a set of jumpers. (see full schematic - Appendix.2.)
 The buttons on the 5-way switch are implemented in our code as digital inputs. When the user presses a button, the ‘UserInterface’ is interrupted that an event has occurred and sends the update to the current screen. In this way, every ‘virtual screen’ will have a different behaviour when an update is signaled. 
+
+![alt text](assets/fig3.9.png?raw=true "Menu Design")
 
 The second task was to implement a simple Menu class with a few objects with which the user can interact easily. The finalized design can be seen in figure 3.6.4. It consists of a list of items with which the user can scroll up or down. The black dot indicates the current item selected by the user. If the user wishes to select that item, he will be redirected to the screen indicated by that item. The two arrows on the right side indirectly indicate the number of items on the screen. Since the screen has limited capacity, if the down arrow is present, that means there are items further down the list - when the user decides to see other items they will be displayed on a new screen thus clearing the old one. Therefore, the rate of scrolling is not by 1 item, but by the number of items that can be on the screen. When the up arrow is present, the menu indicates that there are items further up the screen. 
 
@@ -66,6 +75,8 @@ Every linked screen contains a description of the currently selected option and 
 
 The last step was to create the ‘Screen’ implementation. Similarly to ‘Measure’, ‘Screen’ class is abstract, since there are two implementations with many similarities but slightly different in terms of content. The two implementations are: compass and level meter. 
 The compass design was simple and straightforward. A simple compass design with a single hand was implemented, which points to the cardinal direction in which the user holds the device. The outer circle which denotes the cardinal directions remains static, whilst the hand moves around the circle, pointing in the specified direction. This simple design makes our implementation easier, however, for a greater user experience it would be necessary to create a dynamic cardinality circle and set the hand static, as in most compass applications.
+
+![alt text](assets/fig3.10.png?raw=true "Compass and Level Meter Design") 
   
 The level meter screen is composed of one dynamic cross and a static circle in the middle of the screen. The data from the gyroscope and accelerometer must be converted to fit the size of the screen. As the user tilts the device around, the interface receives data from the two modules and redraws the cross at a rate of 30Hz. Figure 3.6.5 (b) illustrates the level meter and the movement of the cross around the circle.
 Interaction with any of the modules must not interfere with the user interface. The user must be able to interact with the device whilst the controller is gathering data from other modules. In order to implement this, the C++ library, which provides a specific threading functionality for the microcontroller, was used. Therefore, at all times there are at most two threads running: the main thread of the GUI and another thread which is either gathering data, making calculations, taking a picture, etc. 
