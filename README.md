@@ -21,19 +21,19 @@ The screen displays a GUI (Graphical User Interface) which the user will interac
 
 ### Initial requirements
 
-	The first stages of creating the user interface were dedicated to gathering and refining the requirements needed. The following are very general to yet fundamental to the project: 
+The first stages of creating the user interface were dedicated to gathering and refining the requirements needed. The following are very general to yet fundamental to the project: 
 
--	a simple user interface to interact with - must be simple and easy to use
--	a scrollable menu, user must interact with it using the 5-way tactile switch
--	every item in the menu must lead to a screen or to another menu
--	multiple screens to display data coming from other modules (thermometer, level meter..)
--	a header, indicating the current screen and battery level
--	measurement screens, used when interacting with the camera
+* a simple user interface to interact with - must be simple and easy to use
+* a scrollable menu, user must interact with it using the 5-way tactile switch
+* every item in the menu must lead to a screen or to another menu
+* multiple screens to display data coming from other modules (thermometer, level meter..)
+* a header, indicating the current screen and battery level
+* measurement screens, used when interacting with the camera
 
 ### Design
 
 It was decided that GUI will make use of object-oriented principles, which in this case are supported by the C++ libraries. By using objects it is easier to separate the UI into self-contained modules, each providing its own set of functions and interacting with a different parts of the device. It also allows more flexibility in designing each module as well as ease of maintenance. Figure 3.6.1 represents an UML class diagram of the design.
-	Following our initial requirements the user interface was designed as a combination of a ‘virtual screen’ object together with a header object. The header will be present on the screen at all times, while the screen may change multiple times according to actions taken by the user. 
+Following our initial requirements the user interface was designed as a combination of a ‘virtual screen’ object together with a header object. The header will be present on the screen at all times, while the screen may change multiple times according to actions taken by the user. 
 The ‘UserInterface’ object is the actual interface on the screen. As stated, it contains at all times a screen object and a header. In addition, it contains functions to start, initialize the home screen and set-up initial colours when the device boots up.
 The Header object consists of title of current screen and a battery level indicator. Initially,  temperature of the room was included as well but the screen would appear too congested. The header is static and is placed at the top of the screen.
  
@@ -50,7 +50,6 @@ The ‘Measure’ objects interact with the camera, thermometer module and laser
 For the implementation phase most of the functionality specified in the design phase has been achieved. By switching easily between the numerous ‘virtual screens’, the LED buffer must be cleared, modified and redisplayed. This is managed with the API provided by the external library. 
 The screen, with a resolution of 128x64, is structured into 8 ‘pages’ as you can see in figure 3.6.3. Each page is 8 pixels high and 128 pixels long. It was decided that a custom interface would be designed according to this structure, as it is much easier because the library provides the necessary functions to write in any of the provided pages. Of course, it also provides the possibility of writing to specific pixels as well. 
 
- 
 The first task was implementing the ‘UserInterface’ class which contains the function to initialize the display. init() is the function that is called when the display turns on, sets up the brightness and contrast level, colours, displays a welcome screen for two seconds, clears the screen, draws the header, the initial menu and waits for user interaction.
 The colour of the display is set up by adjusting the potential on the of cathodes of the red, green and blue LEDs comprising the backlight. Usually this could be achieved with Digital I/O or PWM pins from the microcontroller. However, because of the lack digital I/O for this secondary in priority task, it was decided that the above would be adjusted manually via a set of jumpers. (see full schematic - Appendix.2.)
 The buttons on the 5-way switch are implemented in our code as digital inputs. When the user presses a button, the ‘UserInterface’ is interrupted that an event has occurred and sends the update to the current screen. In this way, every ‘virtual screen’ will have a different behaviour when an update is signaled. 
@@ -59,9 +58,9 @@ The second task was to implement a simple Menu class with a few objects with whi
 
 The next step in the implementation phase was to create the ‘Measure’ class, initialize and customize its objects. As stated in the design phase, the measure screens are used to interact with the camera, laser and thermometer module.
 The measure screens that appear in the menu are:
-●	Distance - the option allows the user to start the laser, choose a fixed point and the controller will calculate the distance to that point (see section 3.3 for more details).
-●	Point-to-Point - similarly to the above option, it allows the user to calculate the distance between two fixed points.
-●	Thermometer - calculates the temperature in degrees (currently in Celsius) of a fixed point. 
+* Distance - the option allows the user to start the laser, choose a fixed point and the controller will calculate the distance to that point (see section 3.3 for more details).
+* Point-to-Point - similarly to the above option, it allows the user to calculate the distance between two fixed points.
+* Thermometer - calculates the temperature in degrees (currently in Celsius) of a fixed point. 
 
 Every linked screen contains a description of the currently selected option and the steps necessary to complete the calculation. The first screen contains information about the currently selected option and at each point provides the user with the option of returning to the previous screen or to the main menu. These provide the user with specific options according to their needs. 
 
